@@ -40,10 +40,11 @@ public class MainActivity extends Activity implements OnCompletionListener, Seek
     private Utilities utils;
     private int seekForwardTime = 5000; // 5000 milliseconds
     private int seekBackwardTime = 5000; // 5000 milliseconds
-    private int currentSongIndex = 0;
-    private boolean isShuffle = false;
-    private boolean isRepeat = false;
-    private ArrayList<HashMap<String, String>> songsList = new ArrayList<HashMap<String, String>>();
+    static int currentSongIndex = 0;
+    static boolean isShuffle = false;
+    static boolean isRepeat = false;
+    static ArrayList<HashMap<String, String>> songsList = new ArrayList<HashMap<String, String>>();
+    static int indexofSong;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -286,10 +287,12 @@ public class MainActivity extends Activity implements OnCompletionListener, Seek
     public void  playSong(int songIndex){
         // Play song
         try {
-            mp.reset();
-            mp.setDataSource(songsList.get(songIndex).get("songPath"));
-            mp.prepare();
-            mp.start();
+//            mp.reset();
+//            mp.setDataSource(songsList.get(songIndex).get("songPath"));
+//            mp.prepare();
+//            mp.start();
+            Intent i = new Intent(this,myservice.class);
+            startService(i);
             // Displaying Song title
             String songTitle = songsList.get(songIndex).get("songTitle");
             songTitleLabel.setText(songTitle);
@@ -307,8 +310,6 @@ public class MainActivity extends Activity implements OnCompletionListener, Seek
             e.printStackTrace();
         } catch (IllegalStateException e) {
             e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
@@ -324,8 +325,8 @@ public class MainActivity extends Activity implements OnCompletionListener, Seek
      * */
     private Runnable mUpdateTimeTask = new Runnable() {
         public void run() {
-            long totalDuration = mp.getDuration();
-            long currentDuration = mp.getCurrentPosition();
+            long totalDuration = myservice.mp1.getDuration();
+            long currentDuration = myservice.mp1.getCurrentPosition();
 
             // Displaying Total Duration time
             songTotalDurationLabel.setText(""+utils.milliSecondsToTimer(totalDuration));

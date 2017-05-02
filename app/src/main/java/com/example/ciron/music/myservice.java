@@ -1,4 +1,4 @@
-/*package com.example.ciron.music;
+package com.example.ciron.music;
 
 import android.app.Service;
 import android.content.Intent;
@@ -17,8 +17,8 @@ import java.util.Random;
  * Created by ciron on 3/5/17.
  */
 
-/*public class myservice extends Service implements MediaPlayer.OnCompletionListener {
-    MediaPlayer mp;
+public class myservice extends Service implements MediaPlayer.OnCompletionListener {
+    static MediaPlayer mp1;
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
@@ -28,19 +28,18 @@ import java.util.Random;
    @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-       mp = new MediaPlayer();
-       mp.setOnCompletionListener(this);
+       mp1 = new MediaPlayer();
+       mp1.setOnCompletionListener(this);
        playSong(MainActivity.indexofSong);
-
-        return START_STICKY;
+       return START_STICKY;
     }
     public void  playSong(int songIndex){
         // Play song
         try {
-            mp.reset();
-            mp.setDataSource(MainActivity.songsList.get(songIndex).get("songPath"));
-            mp.prepare();
-            mp.start();
+            mp1.reset();
+            mp1.setDataSource(MainActivity.songsList.get(songIndex).get("songPath"));
+            mp1.prepare();
+            mp1.start();
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
         } catch (IllegalStateException e) {
@@ -74,4 +73,3 @@ import java.util.Random;
         }
     }
     }
-*/
