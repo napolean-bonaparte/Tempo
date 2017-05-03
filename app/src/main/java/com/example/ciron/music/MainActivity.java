@@ -1,6 +1,5 @@
 package com.example.ciron.music;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
@@ -9,6 +8,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -32,8 +32,6 @@ public class MainActivity extends Activity implements OnCompletionListener, Seek
     private TextView songTitleLabel;
     private TextView songCurrentDurationLabel;
     private TextView songTotalDurationLabel;
-    // Media Player
-    private  MediaPlayer mp;
     // Handler to update UI timer, progress bar etc,.
     private Handler mHandler = new Handler();;
     private SongManager songManager;
@@ -44,7 +42,18 @@ public class MainActivity extends Activity implements OnCompletionListener, Seek
     static boolean isShuffle = false;
     static boolean isRepeat = false;
     static ArrayList<HashMap<String, String>> songsList = new ArrayList<HashMap<String, String>>();
-    static int indexofSong;
+    public boolean Servicecheck = false;
+
+
+    public class task extends AsyncTask<Void,Void,Void>{
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            songsList = songManager.getPlayList();
+            return null;
+        }
+    }
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -66,20 +75,21 @@ public class MainActivity extends Activity implements OnCompletionListener, Seek
         songTotalDurationLabel = (TextView) findViewById(R.id.songTotalDurationLabel);
 
         // Mediaplayer
-        mp = new MediaPlayer();
         songManager = new SongManager();
         utils = new Utilities();
 
         // Listeners
         songProgressBar.setOnSeekBarChangeListener(this); // Important
-        mp.setOnCompletionListener(this); // Important
+        // Important
 
         // Getting all songs list
-        songsList = songManager.getPlayList();
+
+        new task().execute();
+
 
 //        Log.i("Songlist", songsList.size()+"");
         // By default play first song
-        playSong(0);
+//        playSong(0);
 
         /**
          * Play button click event
@@ -91,16 +101,16 @@ public class MainActivity extends Activity implements OnCompletionListener, Seek
             @Override
             public void onClick(View arg0) {
                 // check for already playing
-                if(mp.isPlaying()){
-                    if(mp!=null){
-                        mp.pause();
+                if(myservice.mp1.isPlaying()){
+                    if(myservice.mp1!=null){
+                        myservice.mp1.pause();
                         // Changing button image to play button
                         btnPlay.setImageResource(R.drawable.play_btn);
                     }
                 }else{
                     // Resume song
-                    if(mp!=null){
-                        mp.start();
+                    if(myservice.mp1!=null){
+                        myservice.mp1.start();
                         // Changing button image to pause button
                         btnPlay.setImageResource(R.drawable.pause_btn);
                     }
@@ -118,14 +128,14 @@ public class MainActivity extends Activity implements OnCompletionListener, Seek
             @Override
             public void onClick(View arg0) {
                 // get current song position
-                int currentPosition = mp.getCurrentPosition();
+                int currentPosition = myservice.mp1.getCurrentPosition();
                 // check if seekForward time is lesser than song duration
-                if(currentPosition + seekForwardTime <= mp.getDuration()){
+                if(currentPosition + seekForwardTime <= myservice.mp1.getDuration()){
                     // forward song
-                    mp.seekTo(currentPosition + seekForwardTime);
+                    myservice.mp1.seekTo(currentPosition + seekForwardTime);
                 }else{
                     // forward to end position
-                    mp.seekTo(mp.getDuration());
+                    myservice.mp1.seekTo(myservice.mp1.getDuration());
                 }
             }
         });
@@ -139,23 +149,23 @@ public class MainActivity extends Activity implements OnCompletionListener, Seek
             @Override
             public void onClick(View arg0) {
                 // get current song position
-                int currentPosition = mp.getCurrentPosition();
+                int currentPosition = myservice.mp1.getCurrentPosition();
                 // check if seekBackward time is greater than 0 sec
                 if(currentPosition - seekBackwardTime >= 0){
                     // forward song
-                    mp.seekTo(currentPosition - seekBackwardTime);
+                    myservice.mp1.seekTo(currentPosition - seekBackwardTime);
                 }else{
                     // backward to starting position
-                    mp.seekTo(0);
+                    myservice.mp1.seekTo(0);
                 }
 
             }
         });
 
-        /**
+        /*
          * Next button click event
          * Plays next song by taking currentSongIndex + 1
-         * */
+          */
         btnNext.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -176,7 +186,7 @@ public class MainActivity extends Activity implements OnCompletionListener, Seek
         /**
          * Back button click event
          * Plays previous song by currentSongIndex - 1
-         * */
+//         * */
         btnPrevious.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -216,7 +226,7 @@ public class MainActivity extends Activity implements OnCompletionListener, Seek
 //                    btnRepeat.setImageResource(R.drawable.repeatpressed);
 //                    btnRepeat.setVisibility(View.INVISIBLE);
                     btnRepeat.setAlpha((float)0);
-                    btnShuffle.setImageResource(R.drawable.shuffle_btn);
+                    btnShuffle.setAlpha((float)1);
                 }
             }
         });
@@ -234,7 +244,6 @@ public class MainActivity extends Activity implements OnCompletionListener, Seek
                     isShuffle = false;
                     btnShuffle.setAlpha((float)1);
                     Toast.makeText(getApplicationContext(), "Shuffle is OFF", Toast.LENGTH_SHORT).show();
-                    btnShuffle.setImageResource(R.drawable.shuffle_btn);
                 }else{
                     // make shuffle to true
                     isShuffle= true;
@@ -243,8 +252,7 @@ public class MainActivity extends Activity implements OnCompletionListener, Seek
                     isRepeat = false;
 //                    btnShuffle.setImageResource(R.drawable.shufflepressed);
                     btnShuffle.setAlpha((float)0);
-                    btnRepeat.setImageResource(R.drawable.repeat_btn);
-                    btnShuffle.setAlpha((float)1);
+                    btnRepeat.setAlpha((float)1);
                 }
             }
         });
@@ -260,7 +268,7 @@ public class MainActivity extends Activity implements OnCompletionListener, Seek
                 Intent i = new Intent(getApplicationContext(), PlaylistActivity.class);
                 startActivityForResult(i, 100);
             }
-        });
+    });
 
     }
 
@@ -287,12 +295,11 @@ public class MainActivity extends Activity implements OnCompletionListener, Seek
     public void  playSong(int songIndex){
         // Play song
         try {
-//            mp.reset();
-//            mp.setDataSource(songsList.get(songIndex).get("songPath"));
-//            mp.prepare();
-//            mp.start();
-            Intent i = new Intent(this,myservice.class);
-            startService(i);
+            if(Servicecheck == true){stopService(new Intent(this,myservice.class));}
+            Intent service = new Intent(this,myservice.class);
+            Servicecheck = true;
+            service.putExtra("songIndex",songIndex);
+            startService(service);
             // Displaying Song title
             String songTitle = songsList.get(songIndex).get("songTitle");
             songTitleLabel.setText(songTitle);
@@ -366,11 +373,11 @@ public class MainActivity extends Activity implements OnCompletionListener, Seek
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
         mHandler.removeCallbacks(mUpdateTimeTask);
-        int totalDuration = mp.getDuration();
+        int totalDuration = myservice.mp1.getDuration();
         int currentPosition = utils.progressToTimer(seekBar.getProgress(), totalDuration);
 
         // forward or backward to certain seconds
-        mp.seekTo(currentPosition);
+        myservice.mp1.seekTo(currentPosition);
 
         // update timer progress again
         updateProgressBar();
@@ -400,16 +407,12 @@ public class MainActivity extends Activity implements OnCompletionListener, Seek
                 currentSongIndex = currentSongIndex + 1;
             }else{
                 // play first song
-                playSong(0);
+//                playSong(0);
                 currentSongIndex = 0;
             }
         }
     }
 
-    @Override
-    public void onDestroy(){
-        super.onDestroy();
-        mp.release();
-    }
+
 
 }

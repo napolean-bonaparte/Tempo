@@ -21,7 +21,7 @@
             android:layout_marginTop="10dp"
             android:layout_weight="1"
             android:paddingLeft="10dp"
-            android:text="No Music Files"
+            android:text="Click the playlist icon to choose songs ->"
             android:textColor="#505968"
             android:textSize="16dp"
             android:textStyle="bold" />
@@ -72,7 +72,7 @@
                 android:id="@+id/btnPrevious"
                 android:layout_width="60dp"
                 android:layout_height="60dp"
-                android:background="@drawable/prev"
+                android:background="@drawable/prev_btn"
                 />
             <!-- Backward Button -->
 
@@ -104,7 +104,7 @@
                 android:id="@+id/btnNext"
                 android:layout_width="60dp"
                 android:layout_height="60dp"
-                android:background="@drawable/next"
+                android:background="@drawable/next_btn"
                  />
         </LinearLayout>
     </LinearLayout>
